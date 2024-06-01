@@ -24,6 +24,7 @@ public class AuthService {
         Utente utente = utenteService.getUtenteByEmail(utenteLoginDto.getEmail());
 
         if(passwordEncoder.matches(utenteLoginDto.getPassword(), utente.getPassword())) {
+            // per farmi ritornare il token che userò come autorizzazione
             return jwtTool.createToken(utente);
         } else {
             throw new UnathorizedException("Error in authorization, relogin!");

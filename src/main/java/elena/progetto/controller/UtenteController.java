@@ -54,15 +54,17 @@ public class UtenteController {
         return utenteService.eliminaUtente(id);
     }
 
-    @PatchMapping("/utente/{utenteID}/eventi/{eventoID}")
-    @PreAuthorize("hasAnyAuthority('UTENTE_NORMALE','ORGANIZZATORE_DI_EVENTI')")
-    public String UtentesceglieEvento (@PathVariable int utenteID, @PathVariable int eventoID ) {
-        return utenteService.utentesceglieEvento(eventoID, utenteID);
-    }
 
-    @PatchMapping("/eventi/{eventoID}/utente/{utenteID}")
-    @PreAuthorize("hasAnyAuthority('UTENTE_NORMALE','ORGANIZZATORE_DI_EVENTI')")
-    public String utenteSiToglieDaEvento (@PathVariable int utenteID, @PathVariable int eventoID ) {
-        return utenteService.utenteSiToglieDaEvento(eventoID, utenteID);
-    }
+    // EXTRA !! (metodi commentati e spiegati perchè in utente service)
+//    @PatchMapping("/utente/{utenteID}/eventi/{eventoID}")
+//    @PreAuthorize("hasAnyAuthority('UTENTE_NORMALE','ORGANIZZATORE_DI_EVENTI')")
+//    public String UtentesceglieEvento (@PathVariable int utenteID, @PathVariable int eventoID ) {
+//        return utenteService.utentesceglieEvento(eventoID, utenteID);
+//    }
+//
+//    @PatchMapping("/eventi/{eventoID}/utente/{utenteID}")
+//    @PreAuthorize("hasAnyAuthority('UTENTE_NORMALE','ORGANIZZATORE_DI_EVENTI')")
+//    public String utenteSiToglieDaEvento (@PathVariable int utenteID, @PathVariable int eventoID ) {
+//        return utenteService.utenteSiToglieDaEvento(eventoID, utenteID);
+//    }
 }
