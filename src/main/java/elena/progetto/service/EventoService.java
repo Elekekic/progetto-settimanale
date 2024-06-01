@@ -7,12 +7,12 @@ import elena.progetto.exceptions.EventoNonTrovatoException;
 import elena.progetto.exceptions.NumMaxPartecipantiRaggiunto;
 import elena.progetto.repository.EventoRepository;
 import elena.progetto.repository.UtenteRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class EventoService {
@@ -34,17 +34,34 @@ public class EventoService {
         return eventoRepository.findById(id);
     }
 
+    @Transactional
     public String salvaEvento(EventoDto eventoDto) {
         Evento evento = new Evento();
         evento.setData(eventoDto.getData());
         evento.setTitolo(eventoDto.getTitolo());
         evento.setDescrizione(eventoDto.getDescrizione());
-        Utente partecipante = (Utente) eventoDto.getPartecipanti();
-        evento.getPartecipanti().add(partecipante);
         evento.setMaxPosti(eventoDto.getMaxPosti());
-        evento.setNumeroPostiDisponibili(eventoDto.getNumeroPostiDisponibili());
         evento.setLuogo(eventoDto.getLuogo());
+
+        List<Utente> partecipanti = utenteRepository.findByIdIn(eventoDto.getPartecipanti());
+
+        if (partecipanti.size() > evento.getMaxPosti()) {
+            throw new NumMaxPartecipantiRaggiunto("Il numero massimo di partecipanti è già stato raggiunto per questo evento");
+        }
+
+        for (Utente partecipante : partecipanti) {
+            partecipante.getEventi().add(evento);
+        }
+
+        evento.setPartecipanti(partecipanti);
+
         eventoRepository.save(evento);
+
+        for (Utente partecipante : partecipanti) {
+            utenteRepository.save(partecipante);
+        }
+
+        evento.setNumeroPostiDisponibili(evento.getMaxPosti() - evento.getPartecipanti().size());
 
         return "Evento con ID:" + evento.getId() + " è stato salvato correttamente";
     }
@@ -60,12 +77,27 @@ public class EventoService {
             evento.setDescrizione(eventoDto.getDescrizione());
             evento.setMaxPosti(eventoDto.getMaxPosti());
 
-            if (evento.getPartecipanti().size() >= evento.getMaxPosti()) {
+            //trovami tutti i partecipanti con l'ID passato
+            List<Utente> partecipanti = utenteRepository.findByIdIn(eventoDto.getPartecipanti());
+
+            // Uso il set e HashSet per evitare doppioni, siccome potrebberò mettermi due volte la stessa persona
+            Set<Utente> utenti = new HashSet<>(partecipanti);
+
+            // se i partecipanti inseriti sono maggiori dei posti massimi, lancia un'exception
+            if (utenti.size() > evento.getMaxPosti()) {
                 throw new NumMaxPartecipantiRaggiunto("Il numero massimo di partecipanti è già stato raggiunto per questo evento");
             }
 
-            Utente partecipante = (Utente) eventoDto.getPartecipanti();
-            evento.getPartecipanti().add(partecipante);
+            // pulisco prima tutti i partecipanti dalla lista
+            evento.getPartecipanti().clear();
+
+            // aggiungo tutti i partecipanti all'evento
+            for (Utente partecipante : utenti) {
+                partecipante.getEventi().add(evento);
+            }
+
+            evento.setPartecipanti(new ArrayList<>(utenti));
+
             evento.setNumeroPostiDisponibili(evento.getMaxPosti() - evento.getPartecipanti().size());
 
             return eventoRepository.save(evento);
@@ -74,14 +106,14 @@ public class EventoService {
         }
     }
 
-    public String eliminaEvento (int id) {
+    public String eliminaEvento(int id) {
         Optional<Evento> eventoOptional = getEventoById(id);
 
         if(eventoOptional.isPresent()) {
             eventoRepository.deleteById(id);
-            return "Evento con ID:" + id+ " è stato eliminato";
+            return "Evento con ID:" + id + " è stato eliminato";
         } else {
-            throw new EventoNonTrovatoException("Evento con ID:" + id+ " non è stato trovato");
+            throw new EventoNonTrovatoException("Evento con ID: " + id + " non è stato trovato");
         }
     }
 }

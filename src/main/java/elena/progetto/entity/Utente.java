@@ -3,17 +3,17 @@ package elena.progetto.entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
-import lombok.ToString;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 
 @Data
 @Entity(name = "utenti")
-@ToString(exclude = "eventi")
 public class Utente implements UserDetails {
 
 
@@ -39,7 +39,20 @@ public class Utente implements UserDetails {
             inverseJoinColumns = @JoinColumn(name = "evento_id")
     )
     @JsonIgnore
-    private List<Evento> eventi;
+    private List<Evento> eventi = new ArrayList<>();
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Utente utente = (Utente) o;
+        return Objects.equals(Id, utente.Id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(Id);
+    }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

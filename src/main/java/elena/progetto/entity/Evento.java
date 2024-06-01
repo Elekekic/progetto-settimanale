@@ -1,16 +1,15 @@
 package elena.progetto.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
-import lombok.ToString;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Data
 @Entity(name = "eventi")
-@ToString(exclude = "partecipanti")
 public class Evento {
 
     @Id
@@ -30,6 +29,6 @@ public class Evento {
     private int numeroPostiDisponibili;
 
     @ManyToMany(mappedBy = "eventi")
-    @JsonIgnore
-    private List<Utente> partecipanti;
+    private List<Utente> partecipanti = new ArrayList<>();
+
 }

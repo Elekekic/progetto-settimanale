@@ -21,7 +21,7 @@ public class AuthService {
     private PasswordEncoder passwordEncoder;
 
     public String authenticateUserandCreateToken(UtenteLoginDto utenteLoginDto) {
-        Utente utente = utenteService.getUserByEmail(utenteLoginDto.getEmail());
+        Utente utente = utenteService.getUtenteByEmail(utenteLoginDto.getEmail());
 
         if(passwordEncoder.matches(utenteLoginDto.getPassword(), utente.getPassword())) {
             return jwtTool.createToken(utente);
