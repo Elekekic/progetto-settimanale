@@ -18,7 +18,7 @@ import java.util.List;
 
 @Configuration
 @EnableWebSecurity(debug = true)
-@EnableMethodSecurity
+@EnableMethodSecurity // mi permette di utilizzare @PreAuthorized
 public class AppConfig {
 
     @Bean
